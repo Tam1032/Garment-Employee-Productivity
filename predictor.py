@@ -4,6 +4,7 @@ import pandas as pd
 import pickle
 
 enc = pickle.load(open('encoder.sav', 'rb'))
+scl = pickle.load(open('scaler.sav', 'rb'))
 rf = pickle.load(open('rfmodel.sav', 'rb'))
 
 @st.cache
@@ -14,6 +15,7 @@ def predict(quarter, department, day, team, targeted_productivity, smv, wip, ove
     X_num = np.array([targeted_productivity, smv, wip, over_time, incentive, idle_time, idle_men,
                      no_of_style_change, no_of_workers]).reshape(1,-1)
     X = np.hstack((X_encoded, X_num))
+    X = scl.transform(X)
     return rf.predict(X)[0]
 
 st.title('Garment Worker Productivity Prediction')
