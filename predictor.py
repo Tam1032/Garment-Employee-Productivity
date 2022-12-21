@@ -19,7 +19,7 @@ def predict(quarter, department, day, team, targeted_productivity, smv, wip, ove
     return rf.predict(X)[0]
 
 st.title('Garment Worker Productivity Prediction')
-st.image("""https://betterwork.org/wp-content/uploads/2016/03/vietnam-factory.jpg""")
+st.image("""https://betterwork.org/wp-content/uploads/2016/03/vietnam-factory.jpg""", width=700)
 st.header('Enter the characteristics of the worker:')
 
 quarter = st.selectbox('Quarter:', ['Quarter1', 'Quarter2', 'Quarter3', 'Quarter4', 'Quarter5'])
