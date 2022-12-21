@@ -7,16 +7,7 @@ enc = pickle.load(open('encoder.sav', 'rb'))
 scl = pickle.load(open('scaler.sav', 'rb'))
 rf = pickle.load(open('rfmodel.sav', 'rb'))
 
-@st.cache
-
-def predict(quarter, department, day, team, targeted_productivity, smv, wip, over_time, incentive, idle_time, idle_men,
-            no_of_style_change, no_of_workers):
-    X_encoded = enc.transform(np.array([[quarter, department, day, team]]))
-    X_num = np.array([targeted_productivity, smv, wip, over_time, incentive, idle_time, idle_men,
-                     no_of_style_change, no_of_workers]).reshape(1,-1)
-    X = np.hstack((X_encoded, X_num))
-    X = scl.transform(X)
-    return rf.predict(X)[0]
+pipe = pickle.load(open('pipeline.sav', 'rb'))
 
 st.title('Garment Worker Productivity Prediction')
 st.image("""https://betterwork.org/wp-content/uploads/2016/03/vietnam-factory.jpg""", width=700)
@@ -38,6 +29,7 @@ no_of_style_change = st.number_input('Number of Style Changes:', min_value=0, ma
 no_of_workers = st.number_input('Number of Workers:', min_value=2, max_value=89, value=52)
 
 if st.button('Predict Productivity'):
-    pdt = predict(quarter, department, day, team, targeted_productivity, smv, wip, over_time, incentive, idle_time,
-                  idle_men, no_of_style_change, no_of_workers)
+    X = [[quarter, department, day, team, targeted_productivity, smv, wip, over_time, incentive, idle_time, idle_men, no_of_style_change, no_of_workers]]
+    X = np.array(X, dtype='object')
+    pdt = pipe.predict(X)[0]
     st.success(f'The predicted productivity of the workers is {pdt:.4f} ')
