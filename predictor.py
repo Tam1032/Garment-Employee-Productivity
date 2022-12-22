@@ -3,10 +3,6 @@ import numpy as np
 import pandas as pd
 import pickle
 
-enc = pickle.load(open('encoder.sav', 'rb'))
-scl = pickle.load(open('scaler.sav', 'rb'))
-rf = pickle.load(open('rfmodel.sav', 'rb'))
-
 pipe = pickle.load(open('pipeline.sav', 'rb'))
 
 st.title('Garment Worker Productivity Prediction')
