@@ -7,6 +7,7 @@ from dash import html
 
 from pandas.io.formats import style
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 from dash.dependencies import Input, Output
 from dash import callback_context
@@ -31,6 +32,12 @@ app.layout = dbc.Container(
         ]),
         dbc.Row([
             dbc.Col([
+                dbc.Card([
+                        dbc.CardBody([
+                            html.H5("Average of actual productivity"),
+                            html.H2(id="avg", children="", style={'font-size':55,'textAlign':'center'}),
+                        ])
+                    ], style={'margin-bottom': 200}),
                 dbc.Card([
                         dbc.CardBody(
                             [
@@ -82,18 +89,18 @@ app.layout = dbc.Container(
                             dbc.CardBody(dcc.Graph(id="kde_plot")
                             ), 
                             className="chart"),
-                        width=6
+                        width=7
                         ),
                     dbc.Col(
                         dbc.Card(
                             dbc.CardBody(dcc.Graph(id="department")
                             ),                            
-                            className="chart"),
+                            className="figure"),
                         width=4
                         ),
                 ]),
                 dbc.Row(
-                    dbc.Col(dcc.Graph(id="actual_productivity"), width=10),
+                    dbc.Col(dcc.Graph(id="actual_productivity"), width=11),
                     )
             ]),
         ]),
@@ -125,6 +132,20 @@ def update_date(start_date, end_date, slider_v):
 
     return start_date, end_date, slider_v
 
+#Update average actual productivity
+@app.callback(
+    Output("avg", "children"),
+    Input('my-date-picker-start','date'),
+    Input('my-date-picker-end','date'),
+    Input('checkbox_quarter','value'),
+)
+
+def update_avg(start_date, end_date, checkbox_quarter):
+    dff = df[((df.date>=start_date) & (df.date<=end_date) & (df.quarter.isin(checkbox_quarter)))]
+    average = dff['actual_productivity'].mean()
+    average_formatted = f"{average:,.2f}"
+    return average_formatted
+
 #Update kde figure
 @app.callback(
     Output("kde_plot", "figure"),
@@ -137,6 +158,10 @@ def update_kde(start_date, end_date, checkbox_quarter):
     hist_data = [dff['actual_productivity']]
     group_labels = ['distplot'] # name of the dataset
     fig = ff.create_distplot(hist_data, group_labels, show_hist=False, show_rug=False)
+    fig2 = ff.create_distplot(hist_data, group_labels, curve_type = 'normal')
+    normal_x = fig2.data[1]['x']
+    normal_y = fig2.data[1]['y']
+    fig.add_traces(go.Scatter(x=normal_x, y=normal_y, mode = 'lines', name = 'normal'))
 
     fig.update_layout(
         plot_bgcolor="white",
@@ -144,7 +169,6 @@ def update_kde(start_date, end_date, checkbox_quarter):
         font_color="black",
         xaxis_showgrid=False, 
         yaxis_showgrid=False,
-        showlegend=False,
     )
 
     return fig
